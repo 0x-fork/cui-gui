@@ -88,11 +88,18 @@ CUI_API cui_vec2 cui_app_size(cui_app *app);
  * a cui_set_theme after it lasts. Later OS changes are followed on Windows and macOS. */
 CUI_API void cui_app_follow_system_theme(cui_app *app, bool follow);
 /* True when the software renderer is drawing (no usable OpenGL, or it was asked for). */
+/* Maximize the window on its current display. Safe right after
+ * cui_app_create. No-op when the backend cannot (for example a
+ * window manager that ignores EWMH, or a fixed-size window). */
+CUI_API void cui_app_maximize(cui_app *app);
+
+
 CUI_API bool cui_app_is_software(cui_app *app);
 /* HWND, NSWindow*, X11 Window (cast to uintptr_t), SDL_Window* or GLFWwindow*. */
 CUI_API void *cui_app_native_window(cui_app *app);
 /* Name of the active backend: "win32", "cocoa", "x11", "sdl2", "glfw". */
 CUI_API const char *cui_app_backend(cui_app *app);
+
 
 /* Native file dialogs. Blocking; returns true and writes the chosen path
  * (UTF-8) to out when the user confirms. On Linux this uses zenity or
