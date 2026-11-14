@@ -57,20 +57,20 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 ### Fixed
 
-- Disabled flame graphs and timeline editors ignore wheel, pointer and keyboard gestures.
-- Disabled node editors ignore wheel zoom and cancel in-progress gestures.
-- A disabled veil keeps its cover visible and leaves clicks available to the widgets behind it.
-- A candlestick chart ignores queued wheel events after it is disabled.
-- Disabling a time histogram cancels its active selection drag.
-- Read-only and disabled query builders leave the supplied rules unchanged.
-- Read-only week calendar events and Gantt tasks can be activated without editing them.
-- The trace viewer reports view changes when a measurement is drawn or cleared.
-- Activating a dot chart from the keyboard before moving its cursor reports the middle sample.
-- Clicking a Sankey ribbon reports which input link was clicked.
-- Virtual lists show the remaining rows immediately when the list shrinks while scrolled.
-- Data grids keep the remaining rows visible when the row count shrinks while scrolled.
-- Sortable table headers and selectable rows show a keyboard focus ring.
-- Adding a filter opens the new chip's value list.
+- Disabled flame graphs and timeline editors ignore wheel, pointer and keyboard gestures ([#85](https://github.com/yappologistic/CUI/issues/85)).
+- Disabled node editors ignore wheel zoom and cancel in-progress gestures ([#85](https://github.com/yappologistic/CUI/issues/85)).
+- A disabled veil keeps its cover visible and leaves clicks available to the widgets behind it ([#85](https://github.com/yappologistic/CUI/issues/85)).
+- A candlestick chart ignores queued wheel events after it is disabled ([#85](https://github.com/yappologistic/CUI/issues/85)).
+- Disabling a time histogram cancels its active selection drag ([#85](https://github.com/yappologistic/CUI/issues/85)).
+- Read-only and disabled query builders leave the supplied rules unchanged ([#75](https://github.com/yappologistic/CUI/issues/75)).
+- Read-only week calendar events and Gantt tasks can be activated without editing them ([#75](https://github.com/yappologistic/CUI/issues/75)).
+- The trace viewer reports view changes when a measurement is drawn or cleared ([#71](https://github.com/yappologistic/CUI/issues/71)).
+- Activating a dot chart from the keyboard before moving its cursor reports the middle sample ([#71](https://github.com/yappologistic/CUI/issues/71)).
+- Clicking a Sankey ribbon reports which input link was clicked ([#71](https://github.com/yappologistic/CUI/issues/71)).
+- Virtual lists show the remaining rows immediately when the list shrinks while scrolled ([#67](https://github.com/yappologistic/CUI/issues/67)).
+- Data grids keep the remaining rows visible when the row count shrinks while scrolled ([#67](https://github.com/yappologistic/CUI/issues/67)).
+- Sortable table headers and selectable rows show a keyboard focus ring ([#67](https://github.com/yappologistic/CUI/issues/67)).
+- Adding a filter opens the new chip's value list ([#67](https://github.com/yappologistic/CUI/issues/67)).
 - Chat typing dots stay still and stop requesting frames with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Running task glyphs in agent plans and tool calls stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Plain spinner arcs, including running jobs and tests, stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
