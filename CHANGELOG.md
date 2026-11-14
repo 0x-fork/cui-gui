@@ -60,6 +60,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 - Disabled flame graphs and timeline editors ignore wheel, pointer and keyboard gestures.
 - Disabled node editors ignore wheel zoom and cancel in-progress gestures.
 - A disabled veil keeps its cover visible and leaves clicks available to the widgets behind it.
+- A candlestick chart ignores queued wheel events after it is disabled.
 - Disabling a time histogram cancels its active selection drag.
 - Read-only and disabled query builders leave the supplied rules unchanged.
 - Read-only week calendar events and Gantt tasks can be activated without editing them.
