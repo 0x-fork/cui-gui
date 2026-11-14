@@ -59,6 +59,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 - Virtual lists show the remaining rows immediately when the list shrinks while scrolled.
 - Data grids keep the remaining rows visible when the row count shrinks while scrolled.
+- Sortable table headers and selectable rows show a keyboard focus ring.
 - Chat typing dots stay still and stop requesting frames with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Running task glyphs in agent plans and tool calls stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Plain spinner arcs, including running jobs and tests, stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
