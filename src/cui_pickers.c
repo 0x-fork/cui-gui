@@ -1051,7 +1051,7 @@ static void cui__paint_ruler(cui_ctx *ui, cui_node *n, void *data) {
     cui_draw_polygon(ui, tri, 3, p->marker);
 }
 
-/** Build a ruler slider, taking vertical wheel input before the enclosing view. */
+/** Build a ruler slider: it takes vertical wheel input before the enclosing view and keeps every rounded value in range. */
 bool cui_ruler_slider_ex(cui_ctx *ui, const char *label, float *value, float min, float max, const cui_ruler_opts *o) {
     cui_ruler_opts d;
     memset(&d, 0, sizeof d);
@@ -1091,7 +1091,7 @@ bool cui_ruler_slider_ex(cui_ctx *ui, const char *label, float *value, float min
     if (r.hovered && (ui->scroll_dx != 0 || wheel != 0) && !st->dragging) {
         float dv = (wheel != 0 ? -wheel : -ui->scroll_dx) * step;
         *value = cui__clampf(*value + (dv > 0 ? CUI_MAX(dv, step) : CUI_MIN(dv, -step)), min, max);
-        *value = roundf((*value - min) / step) * step + min;
+        *value = cui__clampf(roundf((*value - min) / step) * step + min, min, max);
         target = *value;
         if (wheel == 0) ui->scroll_dx = 0;
     }
