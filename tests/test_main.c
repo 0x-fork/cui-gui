@@ -3224,6 +3224,35 @@ static void test_dialog_resize(void) {
     cui_destroy(ui);
 }
 
+typedef struct { bool open; cui_id ok; } dlg_foot_ctx;
+static void build_dialog_foot(cui_ctx *ui, void *u) {
+    dlg_foot_ctx *d = u;
+    cui_dialog(ui, "Footer", &d->open, .resizable = true) {
+        cui_text(ui, "Body");
+        cui_dialog_footer(ui) { cui_button(ui, "OK"); d->ok = cui_last_id(ui); }
+    }
+}
+/** A dialog resized taller keeps its footer at the bottom, and a narrower window narrows it. */
+static void test_dialog_resize_footer_and_window(void) {
+    printf("dialog: the footer follows a resize, and the width follows a smaller window\n");
+    cui_ctx *ui = new_ctx();
+    dlg_foot_ctx d = { true, 0 };
+    run(ui, build_dialog_foot, &d, 3);
+    cui_id pid = (cui_make_id(ui, "Footer") ^ 0xD1A106u) ^ 0x9A4Eu;
+    cui_rect p0 = rect_of(ui, pid), b0 = rect_of(ui, d.ok);
+    float gap0 = (p0.y + p0.h) - (b0.y + b0.h);
+    drag_by(ui, build_dialog_foot, &d, p0.x + p0.w / 2 + 30, p0.y + p0.h - 2, 0, 80);
+    cui_rect p1 = rect_of(ui, pid), b1 = rect_of(ui, d.ok);
+    CHECK_NEAR(p1.h, p0.h + 80, 0.5);
+    CHECK_NEAR((p1.y + p1.h) - (b1.y + b1.h), gap0, 0.5);   /* the footer moved down with the bottom edge */
+    drag_by(ui, build_dialog_foot, &d, p1.x + p1.w - 2, p1.y + p1.h / 2, 200, 0);
+    CHECK_NEAR(rect_of(ui, pid).w, 640, 0.5);
+    cui_set_viewport(ui, 500, 600, 1);
+    run(ui, build_dialog_foot, &d, 3);
+    CHECK(rect_of(ui, pid).w <= 500 - 32 + 0.5f);              /* the stored width follows the window */
+    cui_destroy(ui);
+}
+
 typedef struct { int chosen; cui_id trigger; } menu_ctx;
 static void build_menu(cui_ctx *ui, void *u) {
     menu_ctx *m = u;
@@ -9664,6 +9693,7 @@ int main(void) {
     test_dialog_escape_after_edit();
     test_dialog_drag();
     test_dialog_resize();
+    test_dialog_resize_footer_and_window();
     test_menu();
     test_focus_trap();
     test_tag_limit_batch();
