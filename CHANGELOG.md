@@ -66,19 +66,19 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 - Disabled dropzones and avatar upload targets leave dropped files available to the application ([#77](https://github.com/yappologistic/CUI/issues/77)).
 - Image loading accepts UTF-8 file paths on Windows ([#77](https://github.com/yappologistic/CUI/issues/77)).
 - The JSON viewer reports malformed number literals and string escapes as invalid JSON ([#68](https://github.com/yappologistic/CUI/issues/68)).
-- Scrub inputs discard invalid numeric drafts and keep the last valid value.
-- Money inputs reject drafts whose complete grouped amount would not fit the field.
-- Rolling numbers draw the complete label when its digits or affixes do not fit the animation.
-- Expandable text keeps keyboard focus when its toggle changes label.
-- A dismissed hover card stays closed until the pointer leaves its anchor.
-- A closing command palette leaves keyboard input available and cannot activate a command.
-- An arrow press moves the tab bar by one tab.
-- Choosing a speed dial action preserves the caller's disabled scope.
-- Gradient sliders reach both endpoints and leave idle and disabled values untouched.
-- Ruler wheel steps stay in range when the maximum is between tick marks.
-- Date and color pickers show keyboard focus on their triggers.
-- An open color picker reflects external RGB changes and preserves alpha while editing.
-- Keyboard focus keeps the wheel labels and ruler scale visible.
+- Scrub inputs discard invalid numeric drafts and keep the last valid value ([#79](https://github.com/yappologistic/CUI/issues/79)).
+- Money inputs reject drafts whose complete grouped amount would not fit the field ([#79](https://github.com/yappologistic/CUI/issues/79)).
+- Rolling numbers draw the complete label when its digits or affixes do not fit the animation ([#79](https://github.com/yappologistic/CUI/issues/79)).
+- Expandable text keeps keyboard focus when its toggle changes label ([#81](https://github.com/yappologistic/CUI/issues/81)).
+- A dismissed hover card stays closed until the pointer leaves its anchor ([#81](https://github.com/yappologistic/CUI/issues/81)).
+- A closing command palette leaves keyboard input available and cannot activate a command ([#81](https://github.com/yappologistic/CUI/issues/81)).
+- An arrow press moves the tab bar by one tab ([#81](https://github.com/yappologistic/CUI/issues/81)).
+- Choosing a speed dial action preserves the caller's disabled scope ([#81](https://github.com/yappologistic/CUI/issues/81)).
+- Gradient sliders reach both endpoints and leave idle and disabled values untouched ([#83](https://github.com/yappologistic/CUI/issues/83)).
+- Ruler wheel steps stay in range when the maximum is between tick marks ([#83](https://github.com/yappologistic/CUI/issues/83)).
+- Date and color pickers show keyboard focus on their triggers ([#83](https://github.com/yappologistic/CUI/issues/83)).
+- An open color picker reflects external RGB changes and preserves alpha while editing ([#83](https://github.com/yappologistic/CUI/issues/83)).
+- Keyboard focus keeps the wheel labels and ruler scale visible ([#83](https://github.com/yappologistic/CUI/issues/83)).
 - The wheel scrolls a text area before its enclosing scroll view, then reaches the outer view at the text area's edges. Diagonal input can scroll the text vertically and the outer view horizontally ([#58](https://github.com/yappologistic/CUI/issues/58)).
 - Tag input enforces its tag limit for every tag in a batch ([#58](https://github.com/yappologistic/CUI/issues/58)).
 - Pasting a different complete one-time code emits another completion event ([#58](https://github.com/yappologistic/CUI/issues/58)).
