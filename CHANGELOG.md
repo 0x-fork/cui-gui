@@ -57,6 +57,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 ### Fixed
 
+- The trace viewer reports view changes when a measurement is drawn or cleared.
 - Virtual lists show the remaining rows immediately when the list shrinks while scrolled.
 - Data grids keep the remaining rows visible when the row count shrinks while scrolled.
 - Sortable table headers and selectable rows show a keyboard focus ring.
