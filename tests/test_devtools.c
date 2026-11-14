@@ -167,11 +167,13 @@ static const cui_query_field qb_fields[] = {
     { "Status", CUI_QUERY_CHOICE, qb_status, 3 }, { "Assignee", CUI_QUERY_TEXT }, { "Priority", CUI_QUERY_NUMBER }, { "Has PR", CUI_QUERY_BOOL },
 };
 
-typedef struct { cui_query_node nodes[16]; int n; bool changed, read_only; cui_size w; } qb_ctx;
-/** Build the same query in editable and read-only modes. */
+typedef struct { cui_query_node nodes[16]; int n; bool changed, read_only, disabled; cui_size w; } qb_ctx;
+/** Build the same query in editable, read-only and disabled modes. */
 static void build_qb(cui_ctx *ui, void *u) {
     qb_ctx *c = u;
+    cui_push_disabled(ui, c->disabled);
     c->changed = cui_query_builder(ui, "filter", qb_fields, 4, c->nodes, &c->n, 16, .read_only = c->read_only);
+    cui_pop_disabled(ui);
 }
 
 /** Rendering a read-only query does not initialize or normalize caller storage. */
@@ -187,6 +189,16 @@ static void test_query_read_only(void) {
     empty.read_only = false;
     run(ui, build_qb, &empty, 1);
     CHECK(empty.n == 1 && empty.nodes[0].group && empty.changed);
+    /* disabled: the rules stay as given, and the layout is the editable one */
+    qb_ctx on = { .nodes = {{ .group = true }, { .depth = 1 }}, .n = 2 };
+    qb_ctx off = { .nodes = {{ .group = true }, { .depth = 1 }}, .n = 2, .disabled = true };
+    run(ui, build_qb, &on, 2);
+    cui_rect on_r = cui_get_rect(ui, cui_make_id(ui, "filter"));
+    run(ui, build_qb, &off, 2);
+    cui_rect off_r = cui_get_rect(ui, cui_make_id(ui, "filter"));
+    CHECK(off.n == 2 && off.nodes[1].value[0] == '\0' && !off.changed);
+    CHECK(on.nodes[1].value[0] != '\0');
+    CHECK(on_r.h > 0 && off_r.h == on_r.h);
     cui_destroy(ui);
 }
 

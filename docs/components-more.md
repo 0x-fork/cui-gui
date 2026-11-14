@@ -1196,7 +1196,7 @@ Conditions joined by all or any, in groups you can nest (three deep by default, 
 
 Keyboard: Tab moves through the controls of each rule. Left and Right switch between All and Any, Up and Down change a focused select, Space opens it, and the remove buttons take Enter or Space.
 
-In read-only mode, the query builder displays the rules without changing the caller's array or count.
+A read-only or disabled query builder shows the rules without changing the caller's array or count. A disabled one keeps the editable layout.
 
 ### Schedule picker
 
