@@ -57,6 +57,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 ### Fixed
 
+- Read-only and disabled query builders leave the supplied rules unchanged.
 - The trace viewer reports view changes when a measurement is drawn or cleared.
 - Activating a dot chart from the keyboard before moving its cursor reports the middle sample.
 - Clicking a Sankey ribbon reports which input link was clicked.
