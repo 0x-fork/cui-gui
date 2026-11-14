@@ -57,6 +57,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 ### Fixed
 
+- Disabling a time histogram cancels its active selection drag.
 - Read-only and disabled query builders leave the supplied rules unchanged.
 - Read-only week calendar events and Gantt tasks can be activated without editing them.
 - The trace viewer reports view changes when a measurement is drawn or cleared.
