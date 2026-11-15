@@ -4448,10 +4448,15 @@ static void scene_canvas_controls(cui_ctx *ui, int f) {
 }
 
 /* a picture made here: a sky, a low sun and soft hills */
+/* the texture belongs to one context, so it lives in that context's state store, freed with it;
+ * a cache keyed by the context's address could hand a new context at the same address a
+ * texture from one already destroyed */
+typedef struct { cui_texture tex; } shots_result_pic;
+static void shots_result_pic_free(cui_ctx *ui, void *data) { shots_result_pic *t = data; if (t->tex) cui_image_destroy(ui, t->tex); }
 static cui_texture cb_result_image(cui_ctx *ui) {
-    static cui_ctx *made_for;
-    static cui_texture tex;
-    if (made_for == ui && tex) return tex;
+    const cui_id pic_id = 0x5E5017A6u;   /* a fixed id: the picture is shared by every page that shows it */
+    shots_result_pic *held = cui_state(ui, pic_id, sizeof *held);
+    if (held->tex) return held->tex;
     enum { W = 288, H = 360 };
     static unsigned char px[W * H * 4];
     for (int y = 0; y < H; y++)
@@ -4476,9 +4481,9 @@ static cui_texture cb_result_image(cui_ctx *ui) {
             unsigned char *p = &px[(y * W + x) * 4];
             p[0] = (unsigned char)acc[0]; p[1] = (unsigned char)acc[1]; p[2] = (unsigned char)acc[2]; p[3] = 255;
         }
-    tex = cui_image_create(ui, W, H, px);
-    made_for = ui;
-    return tex;
+    held->tex = cui_image_create(ui, W, H, px);
+    cui_state_on_free(ui, pic_id, shots_result_pic_free);
+    return held->tex;
 }
 /* a picture, a secret and a spoiler; the key is shown, the others covered */
 static bool veil_photo, veil_key = true, veil_spoiler;
