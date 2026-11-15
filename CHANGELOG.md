@@ -73,6 +73,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 - Data grids keep the remaining rows visible when the row count shrinks while scrolled ([#67](https://github.com/yappologistic/CUI/issues/67)).
 - Sortable table headers and selectable rows show a keyboard focus ring ([#67](https://github.com/yappologistic/CUI/issues/67)).
 - Adding a filter opens the new chip's value list ([#67](https://github.com/yappologistic/CUI/issues/67)).
+- Plain-text code editor lines remain visible after leading spaces or tabs ([#87](https://github.com/yappologistic/CUI/issues/87)).
 - Chat typing dots stay still and stop requesting frames with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Running task glyphs in agent plans and tool calls stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
 - Plain spinner arcs, including running jobs and tests, stay still with reduced motion ([#65](https://github.com/yappologistic/CUI/issues/65)).
