@@ -780,8 +780,9 @@ drives. Linux adds Devices with the file-system root and mounted data locations;
 kernel, runtime and container mounts are omitted. macOS adds Volumes with the
 file-system root and browsable mounted volumes. Mount-point names label Unix
 volumes. Network drives on Windows use a generic label to avoid probing an offline
-server. The sidebar scrolls independently, and the deepest enclosing volume is
-highlighted. The native list is cached until Refresh/F5 or reopening a picker.
+server. The sidebar scrolls independently. Only the most specific enclosing place
+or volume is highlighted: Home suppresses its drive, and Documents suppresses Home.
+The native list is cached until Refresh/F5 or reopening a picker.
 Custom `places` replace the native sidebar, have no six-entry limit and scroll too.
 Browser builds and `CUI_NO_FILESYSTEM` do not enumerate native volumes.
 

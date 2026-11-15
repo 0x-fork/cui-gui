@@ -538,12 +538,12 @@ static void cui__fb_build_places(cui__fb_frame *f) {
     const char *const *places = o->places;
     if (!places && !s->places_init) cui__fb_default_places(ui, s);
     int np = places ? o->place_count : s->places_n;
-    int selected_volume = -1;
+    int selected_place = -1;
     size_t longest = 0;
     if (!places) for (int k = 0; k < np; k++) {
         const cui__fb_place *p = &s->places[k];
         size_t len = strlen(p->path);
-        if (p->volume && len > longest && cui__fb_below(f->path, p->path)) { selected_volume = k; longest = len; }
+        if (len > longest && cui__fb_below(f->path, p->path)) { selected_place = k; longest = len; }
     }
     cui_scroll_opts so;
     memset(&so, 0, sizeof so);
@@ -568,7 +568,7 @@ static void cui__fb_build_places(cui__fb_frame *f) {
         if (places) { const char *sl = pp + strlen(pp); while (sl > pp && !cui__is_sep(sl[-1])) sl--; if (*sl) label = sl; }
         cui_id pid = cui__hash_str(pp, f->id ^ 0x91ACu);
         cui_interact pr2 = cui__interact(ui, pid, CUI_IF_FOCUSABLE);
-        bool here = !places && s->places[k].volume ? k == selected_volume : !strcmp(pp, f->path);
+        bool here = places ? !strcmp(pp, f->path) : k == selected_place;
         if (pr2.clicked || pr2.keyboard_activate) f->go_to = pp;
         int row = cui__node_new(ui, pid);
         cui_node *rn = &ui->nodes[row];

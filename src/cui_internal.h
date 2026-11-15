@@ -554,6 +554,11 @@ struct cui_ctx {
     int click_count;
     double last_click_time;
     float last_click_x, last_click_y;
+    struct {
+        int count;
+        bool restarted;
+        float first_x, first_y, last_x, last_y;
+    } pending_clicks;               /* input collected before the frame clock advances */
     float scroll_dx, scroll_dy;
     bool kdown[CUI_KEY_COUNT];
     uint8_t kpressed[CUI_KEY_COUNT];

@@ -19,6 +19,7 @@ static int checks, failures;
 static cui_sw_renderer *sw;
 typedef struct {
     char path[1024], out[1024];
+    char listed_path[1024];
     const char *const *places;
     int count, listings;
     bool picker, open;
@@ -27,30 +28,34 @@ typedef struct {
 
 /** Supply neutral content without reading the developer's directories. */
 static int listing(void *user, const char *path, cui_file_entry *out, int cap, char *names, size_t nc, bool hidden) {
-    (void)path; (void)names; (void)nc; (void)hidden;
+    (void)names; (void)nc; (void)hidden;
     browser *b = user;
     b->listings++;
+    snprintf(b->listed_path, sizeof b->listed_path, "%s", path);
     const char *const folders[] = { "Albums", "Artists", "Playlists" };
     int n = cap < 3 ? cap : 3;
     for (int i = 0; i < n; i++) out[i] = (cui_file_entry){ folders[i], true, 0, 0 };
     return n;
 }
 
+/** Deliver input before beginning a frame, as the native app loop does. */
+static void frame(cui_ctx *ui, browser *b, float dt) {
+    cui_begin_frame(ui, dt);
+    cui_column(ui, .width = CUI_FILL, .height = CUI_FILL, .pad = 24, .bg = CUI_COLOR_BACKGROUND) {
+        if (b->picker) {
+            cui_file_picker(ui, "pick", &b->open, b->out, sizeof b->out, .title = "Choose a folder", .folders = true,
+                .start = b->path, .list = listing, .list_user = b);
+        } else {
+            cui_file_browser(ui, "files", b->path, sizeof b->path, .list = listing, .list_user = b,
+                .places = b->places, .place_count = b->count, .height = CUI_PX(b->height > 0 ? b->height : 400));
+        }
+    }
+    cui_end_frame(ui);
+}
+
 /** Build enough frames for layout, hit rectangles and modal animations. */
 static void frames(cui_ctx *ui, browser *b, int n) {
-    for (int i = 0; i < n; i++) {
-        cui_begin_frame(ui, 1.0f / 60);
-        cui_column(ui, .width = CUI_FILL, .height = CUI_FILL, .pad = 24, .bg = CUI_COLOR_BACKGROUND) {
-            if (b->picker) {
-                cui_file_picker(ui, "pick", &b->open, b->out, sizeof b->out, .title = "Choose a folder", .folders = true,
-                    .start = b->path, .list = listing, .list_user = b);
-            } else {
-                cui_file_browser(ui, "files", b->path, sizeof b->path, .list = listing, .list_user = b,
-                    .places = b->places, .place_count = b->count, .height = CUI_PX(b->height > 0 ? b->height : 400));
-            }
-        }
-        cui_end_frame(ui);
-    }
+    for (int i = 0; i < n; i++) frame(ui, b, 1.0f / 60);
 }
 
 /** Locate visible labels, without relying on the sidebar's private state. */
@@ -138,7 +143,65 @@ static void native_places(void) {
     int read = b.listings;
     frames(ui, &b, 5); CHECK(b.listings == read);
     refresh(ui, &b); CHECK(b.listings > read);
+    click_label(ui, &b, "Home"); frames(ui, &b, 2);
+    cui_node *home = label(ui, "Home");
+    CHECK(home && home->font == CUI_FONT_MEDIUM);
+#if defined(_WIN32)
+    char home_drive[] = "(A:)"; home_drive[1] = b.path[0];
+    for (int j = 0; j < ui->node_count; j++) {
+        cui_node *n = &ui->nodes[j];
+        if (n->text && n->text_len >= 4 && !memcmp(n->text + n->text_len - 4, home_drive, 4))
+            CHECK(n->font != CUI_FONT_MEDIUM);
+    }
+#else
+    cui_node *root = label(ui, "File system");
+    CHECK(root && root->font != CUI_FONT_MEDIUM);
+#endif
+    click_label(ui, &b, "Documents"); frames(ui, &b, 2);
+    home = label(ui, "Home");
+    cui_node *documents = label(ui, "Documents");
+    CHECK(home && home->font != CUI_FONT_MEDIUM && documents && documents->font == CUI_FONT_MEDIUM);
+    size_t len = strlen(b.path);
+    snprintf(b.path + len, sizeof b.path - len, "/Albums"); frames(ui, &b, 2);
+    documents = label(ui, "Documents"); home = label(ui, "Home");
+    CHECK(documents && documents->font == CUI_FONT_MEDIUM && home && home->font != CUI_FONT_MEDIUM);
     cui_destroy(ui);
+}
+
+/** A double-click after an idle interval opens the folder on the second click. */
+static void idle_double_click(void) {
+    const struct { float first_dt, second_dt; bool batched, opens; } cases[] = {
+        { 1.0f / 60, 1.0f / 60, false, true },
+        { 1.0f, 1.0f / 60, false, true },
+        { 1.0f / 60, 1.0f, false, false },
+        { 1.0f, 0, true, true }
+    };
+    for (int modal = 0; modal < 2; modal++) for (size_t k = 0; k < sizeof cases / sizeof cases[0]; k++) {
+        cui_ctx *ui = context(false);
+        browser b = { "/one" }; b.picker = modal != 0; b.open = b.picker;
+        frames(ui, &b, 5);
+        cui_node *album = label(ui, "Albums"); CHECK(album != NULL);
+        if (album) {
+            cui_rect r = album->rect;
+            cui_input_mouse_move(ui, r.x + 8, r.y + r.h / 2);
+            for (int click = 0; click < 2; click++) {
+                cui_input_mouse_button(ui, CUI_MOUSE_LEFT, true);
+                if (!cases[k].batched) frame(ui, &b, click ? cases[k].second_dt : cases[k].first_dt);
+                cui_input_mouse_button(ui, CUI_MOUSE_LEFT, false);
+                if (!cases[k].batched) frames(ui, &b, 1);
+            }
+            if (cases[k].batched) frame(ui, &b, cases[k].first_dt);
+            frames(ui, &b, 2);
+            printf("double-click: modal=%d case=%u\n", modal, (unsigned)k);
+            const char *expected = cases[k].opens ? "/one/Albums" : "/one";
+            CHECK(!strcmp(b.listed_path, expected));
+            if (b.picker && cases[k].opens) {
+                click_label(ui, &b, "Choose");
+                CHECK(!b.open && !strcmp(b.out, "/one/Albums"));
+            } else if (!b.picker) CHECK(!strcmp(b.path, expected));
+        }
+        cui_destroy(ui);
+    }
 }
 
 /** Exercise escaped mount names, filtering, refresh and picker reopening. */
@@ -170,16 +233,17 @@ static void mount_fixture(const char *fixture) {
 }
 
 /** Save actual CUI picker pixels from the isolated, neutral fixture. */
-static void screenshot(const char *dir, bool dark) {
+static void screenshot(const char *dir, bool dark, bool home) {
     cui_ctx *ui = context(dark);
     browser b = { "/mnt/Music" }; b.picker = true; b.open = true;
+    if (home) snprintf(b.path, sizeof b.path, "/home/demo");
     frames(ui, &b, 8);
     const cui_draw_data *dd = cui_get_draw_data(ui);
     unsigned char *px = malloc((size_t)dd->width_px * (size_t)dd->height_px * 4);
     CHECK(px != NULL);
     if (px) {
         cui_sw_render(sw, dd, px, dd->width_px, dd->height_px, dd->width_px * 4, CUI_SW_RGBA);
-        char path[2048]; snprintf(path, sizeof path, "%s/file-picker%s.png", dir, dark ? "-dark" : "");
+        char path[2048]; snprintf(path, sizeof path, "%s/%s%s.png", dir, home ? "home" : "file-picker", dark ? "-dark" : "");
         CHECK(cui_write_png(path, px, dd->width_px, dd->height_px, dd->width_px * 4));
         free(px);
     }
@@ -189,9 +253,12 @@ static void screenshot(const char *dir, bool dark) {
 /** Run regressions, or render the same fixture against a before/after library. */
 int main(int argc, char **argv) {
     sw = cui_sw_create();
-    if (argc == 3 && !strcmp(argv[1], "--shots")) { screenshot(argv[2], false); screenshot(argv[2], true); }
+    if (argc == 3 && (!strcmp(argv[1], "--shots") || !strcmp(argv[1], "--home-shots"))) {
+        bool home = !strcmp(argv[1], "--home-shots");
+        screenshot(argv[2], false, home); screenshot(argv[2], true, home);
+    }
     else {
-        custom_places(); native_places();
+        custom_places(); native_places(); idle_double_click();
         const char *fixture = getenv("CUI_TEST_MOUNTS");
         if (fixture) mount_fixture(fixture);
     }
