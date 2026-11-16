@@ -215,6 +215,7 @@ static void mount_fixture(const char *fixture) {
     CHECK(label(ui, "USB Drive") != NULL);
     CHECK(label(ui, "kernel") == NULL);
     CHECK(label(ui, "containers") == NULL);
+    CHECK(label(ui, "hosts") == NULL);   /* a container's configuration file, bound from the host disk */
     click_label(ui, &b, "USB Drive");
     CHECK(!strcmp(b.path, "/mnt/USB Drive"));
     FILE *fp = fopen(fixture, "w"); CHECK(fp != NULL);

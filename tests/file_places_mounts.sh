@@ -19,6 +19,7 @@ cat > "$fixture" <<'MOUNTS'
 server:/share /mnt/Shared nfs rw 0 0
 proc /mnt/kernel proc rw 0 0
 overlay /var/lib/containers overlay rw 0 0
+/dev/demo /etc/hosts ext4 rw 0 0
 MOUNTS
 # /proc/self is resolved by mount's process; explicitly address the shell
 # that exec will replace, so the reader sees the fixture at /proc/self/mounts.

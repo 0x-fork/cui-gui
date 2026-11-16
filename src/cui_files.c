@@ -364,7 +364,8 @@ static bool cui__fb_below(const char *path, const char *root) {
 /** Leave kernel, runtime and container mounts out of the user-facing list. */
 static bool cui__fb_user_mount(const struct mntent *m) {
     const char *p = m->mnt_dir, *type = m->mnt_type;
-    static const char *const system[] = { "/dev", "/proc", "/sys", "/boot", "/usr", "/var/lib", "/var/run", "/snap", "/mnt/wsl", "/mnt/wslg" };
+    /* /etc: a container binds its hosts, hostname and resolv.conf files there from the host's disk */
+    static const char *const system[] = { "/dev", "/proc", "/sys", "/boot", "/etc", "/usr", "/var/lib", "/var/run", "/snap", "/mnt/wsl", "/mnt/wslg" };
     static const char *const pseudo[] = { "proc", "sysfs", "devtmpfs", "devpts", "cgroup", "cgroup2", "securityfs", "pstore", "debugfs", "tracefs", "configfs", "mqueue", "hugetlbfs", "rpc_pipefs", "binfmt_misc", "fusectl", "nsfs", "efivarfs", "bpf", "autofs", "overlay", "squashfs", "fuse.portal", "fuse.gvfsd-fuse" };
     if (p[0] != '/' || !strcmp(p, "/")) return false;
     for (size_t i = 0; i < sizeof system / sizeof system[0]; i++) if (cui__fb_below(p, system[i])) return false;
