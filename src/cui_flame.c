@@ -130,10 +130,10 @@ static double cui__fl_nice(double raw) {
  * up to 20 s, then steps a clock reads in (30 s, 1, 2, 5, 10, 15, 30 min,
  * 1, 2, 3, 6, 12 h), then 1, 2 or 5 times a power of ten days. */
 double cui__fl_step(double raw) {
-    static const double clock[] = { 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400 };
+    static const double clock_steps[] = { 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400 };
     if (!(raw > 20)) return cui__fl_nice(raw);
-    for (int i = 0; i < (int)(sizeof clock / sizeof clock[0]); i++)
-        if (raw <= clock[i]) return clock[i];
+    for (int i = 0; i < CUI_COUNTOF(clock_steps); i++)
+        if (raw <= clock_steps[i]) return clock_steps[i];
     return cui__fl_nice(raw / 86400) * 86400;
 }
 /* A tick at `t` seconds on a ruler `step` apart. Steps of a second or more
