@@ -319,6 +319,9 @@ static void cui__mac_menu(void) {
     [NSApp setWindowsMenu:winMenu];
 }
 
+/* Placements count y down from the top of the main screen, AppKit up from its bottom. */
+static CGFloat cui__mac_main_top(void) { return NSScreen.screens.count ? NSScreen.screens[0].frame.size.height : 0; }
+
 bool cui__plat_init(cui_app *app) {
     @autoreleasepool {
         [NSApplication sharedApplication];
@@ -346,9 +349,7 @@ bool cui__plat_init(cui_app *app) {
         const cui_window_placement *pl = app->desc.placement;
         BOOL placed = NO;
         if (pl && pl->has_position) {
-            /* placements count y down from the top of the main screen, AppKit up from its bottom */
-            CGFloat top = NSScreen.screens.count ? NSScreen.screens[0].frame.size.height : 0;
-            NSRect content = NSMakeRect(pl->x, top - pl->y - app->desc.height, app->desc.width, app->desc.height);
+            NSRect content = NSMakeRect(pl->x, cui__mac_main_top() - pl->y - app->desc.height, app->desc.width, app->desc.height);
             NSRect outer = [w frameRectForContentRect:content];
             NSRect caption = NSMakeRect(outer.origin.x, NSMaxY(content), outer.size.width, NSMaxY(outer) - NSMaxY(content));
             for (NSScreen *screen in NSScreen.screens)
@@ -501,8 +502,6 @@ cui_window_state cui__plat_window_state(cui_app *app) {
     NSWindow *w = cui__p(app).window;
     return w.isMiniaturized ? CUI_WINDOW_MINIMIZED : w.isZoomed ? CUI_WINDOW_MAXIMIZED : CUI_WINDOW_NORMAL;
 }
-
-static CGFloat cui__mac_main_top(void) { return NSScreen.screens.count ? NSScreen.screens[0].frame.size.height : 0; }
 
 void cui__plat_set_position(cui_app *app, int x, int y) {
     NSWindow *w = cui__p(app).window;
