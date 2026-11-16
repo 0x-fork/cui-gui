@@ -879,6 +879,12 @@ static void test_trace_links(void) {
     cui_rect zs = cui_trace_span_rect(ui, id, &sp[3]);
     move(ui, build_tr, &c, zs.x - 6, zs.y + zs.h * 0.5f);
     CHECK(c.r.hovered == -1 && c.r.hovered_link == 0);
+    /* a span that ends a hair before the view starts is not drawn, so it has no rect, although
+     * its end falls inside the plot's padding */
+    c.view.start = 0.0090005; c.view.end = 0.017;
+    run(ui, build_tr, &c, 2);
+    CHECK(c.view.start == 0.0090005);
+    CHECK(cui_trace_span_rect(ui, id, &sp[1]).w == 0 && cui_trace_span_rect(ui, id, &sp[3]).w > 0);
     c.view.start = c.view.end = 0;
     /* a folded lane: its links meet the top row, its deeper spans have no rect */
     c.tracks[0].collapsed = true;

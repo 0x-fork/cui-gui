@@ -1769,6 +1769,9 @@ cui_rect cui_trace_span_rect(cui_ctx *ui, cui_id trace, const cui_trace_span *sp
     cui__tr_state *st = cui_state(ui, trace ^ 0x7A1Eu, sizeof *st);
     if (!st->geo_valid || st->geo_frame != ui->frame || span->track < 0 || span->track >= st->geo_nt || span->depth < 0) return none;
     if (st->geo_folded[span->track] && span->depth > 0) return none;
+    /* drawn only when it meets the view (cui__trf_row_items); an end just outside the time range
+     * can still fall inside the plot's padding */
+    if (!(span->end > st->geo_t0 && span->start < st->geo_t1)) return none;
     double k = st->geo_plot_w / (st->geo_t1 - st->geo_t0);
     double x0 = st->geo_plot_x + (span->start - st->geo_t0) * k, x1 = st->geo_plot_x + (span->end - st->geo_t0) * k;
     float y = st->geo_body_y + (st->geo_row0[span->track] + span->depth) * st->geo_row_h - st->geo_scroll;
