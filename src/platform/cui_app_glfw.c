@@ -260,8 +260,12 @@ void cui__plat_gl_swap(cui_app *app) {
     glfwSwapBuffers(g->win);
     if (g->maximize_after_frame) {
         g->maximize_after_frame = false;
-        if (!g->normal_pos_known) cui__glfw_note_position(g);   /* the place the system chose */
-        cui__glfw_note_size(g);   /* and the size, which the window system may have changed */
+        /* not when the app maximized the window itself before this frame (cui_app_maximize right
+         * after cui_app_create): the size then is the maximized one */
+        if (cui__plat_window_state(app) == CUI_WINDOW_NORMAL) {
+            if (!g->normal_pos_known) cui__glfw_note_position(g);   /* the place the system chose */
+            cui__glfw_note_size(g);   /* and the size, which the window system may have changed */
+        }
         glfwMaximizeWindow(g->win);
     }
 }

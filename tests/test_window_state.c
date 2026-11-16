@@ -141,11 +141,13 @@ int main(void) {
     }
     cui_app_destroy(app);
 
-    /* a window saved maximized opens maximized and restores to its saved size */
+    /* a window saved maximized opens maximized and restores to its saved size, also when the app
+     * maximizes it as well right after cui_app_create, as an app that opens maximized does */
     at.state = CUI_WINDOW_MAXIMIZED;
     app = cui_app_create(&(cui_app_desc){ .title = "CUI window state test", .placement = &at });
     expect(app != NULL, "open maximized: window created");
     if (app) {
+        cui_app_maximize(app);
         if (reach(app, CUI_WINDOW_MAXIMIZED, "open maximized")) {
             expect_placement(app, x, y, w, h, CUI_WINDOW_MAXIMIZED, "open maximized");
             cui_app_restore(app);
