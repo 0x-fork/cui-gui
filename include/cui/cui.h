@@ -4621,6 +4621,22 @@ typedef enum cui_axis_units {
     CUI_AXIS_HOURS             /* hours shown as a time of day: 12.25 is 12:15, and 30 is 06:00 the next day */
 } cui_axis_units;
 
+/* Writes the label for `value` into `out`, for an axis or a readout that a format string
+ * cannot describe: month names, dates, a locale's decimal comma. At most `capacity` bytes,
+ * the terminating zero included (`capacity` is at least 64); longer text is cut. Called while
+ * the frame ends, so `user` must stay valid until cui_end_frame. A value from the axis can
+ * carry rounding error from the label step: round it before using it as an index.
+ *
+ *     static void month_name(void *user, double value, char *out, size_t capacity) {
+ *         static const char *const names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+ *                                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+ *         long m = lround(value);
+ *         (void)user;
+ *         snprintf(out, capacity, "%s", m >= 1 && m <= 12 ? names[m - 1] : "");
+ *     }
+ */
+typedef void (*cui_axis_label_fn)(void *user, double value, char *out, size_t capacity);
+
 /* Dot-matrix chart: values drawn as a grid of dots, lit up to each column's value and dim
  * above it. Several series stack, each in its own band, and an `accent` series is drawn in
  * the accent color: the item being edited, or the part that matters. The pointer, or the
@@ -4658,6 +4674,10 @@ typedef struct cui_dot_chart_opts {
     bool no_readout;           /* no value label under the pointer */
     const cui_chart_annotation *annotations;   /* lines and points drawn over the dots */
     int annotation_count;      /* number of `annotations` */
+    cui_axis_label_fn x_label; /* writes the x labels and the readout's x in place of x_units and x_format; x_units still picks the spacing */
+    void *x_label_user;        /* passed to `x_label` as its first argument */
+    cui_axis_label_fn value_label;   /* writes the readout's value in place of `format`; `unit` still follows it */
+    void *value_label_user;    /* passed to `value_label` as its first argument */
 } cui_dot_chart_opts;
 
 typedef struct cui_dot_chart_result {
@@ -4691,6 +4711,8 @@ typedef struct cui_event_track_opts {
     bool no_add;               /* clicks and Enter do not add events */
     bool no_remove;            /* double-clicks and Delete do not remove events */
     bool no_axis;              /* hides the axis labels under the dots */
+    cui_axis_label_fn label;   /* writes the axis labels and the selected event's time in place of units and format; units still picks the spacing */
+    void *label_user;          /* passed to `label` as its first argument */
 } cui_event_track_opts;
 
 typedef struct cui_event_track_result {

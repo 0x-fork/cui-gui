@@ -2284,6 +2284,27 @@ Series stack: each one fills its own band above the one before it, and negative,
 
 `x_units = CUI_AXIS_HOURS` labels x as times of day, so 13.5 reads 13:30 and 30 reads 06:00 the next morning; otherwise `x_format` prints the labels. The chart keeps a gutter on its right for value labels, the same width as the event track's, so the two stacked at one width share their x positions.
 
+For labels a format string cannot write, such as month names, dates or a decimal comma, pass a function of type `cui_axis_label_fn`: `x_label` writes the x labels and the readout's x, and `value_label` writes the readout's value, with `unit` still after it. Each gets its own user pointer (`x_label_user`, `value_label_user`), the value, and a buffer of at least 64 bytes to fill; longer text is cut. `x_units` still picks the spacing, so with `CUI_AXIS_HOURS` the labels fall on whole hours and quarters. The functions run while the frame ends, so what the user pointer points to must last until `cui_end_frame`.
+
+```c
+static void month_name(void *user, double x, char *out, size_t capacity) {
+    static const char *const names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    long m = lround(x);                      /* x can carry rounding error from the label step */
+    (void)user;
+    snprintf(out, capacity, "%s", m >= 1 && m <= 12 ? names[m - 1] : "");
+}
+static void euros(void *user, double v, char *out, size_t capacity) {
+    long long c = llround(v * 100);          /* 2735.31 as 2.735,31, below a million */
+    (void)user;
+    if (c >= 100000) snprintf(out, capacity, "%lld.%03lld,%02lld", c / 100000, c / 100 % 1000, c % 100);
+    else snprintf(out, capacity, "%lld,%02lld", c / 100, c % 100);
+}
+
+cui_dot_chart(ui, "spent", series, 1, 12, .x_min = 1, .x_max = 12, .x_step = 1,
+              .x_label = month_name, .value_label = euros, .unit = "EUR");
+```
+
 The result reports the sample under the pointer or the keyboard cursor (`hovered`, its `x` and the stacked `value`, or -1), and `clicked` with the exact `x` of a click. The readout beside the cursor shows the time and the value with `unit`; `no_readout` hides it.
 
 In a right-to-left interface the chart keeps time running left to right, like the other time-based components, and Right still moves later. Its labels and readout are drawn with the library's text, so Persian and Arabic labels are shaped when CUI is built with `CUI_TEXT_SHAPING` and a font that covers them is loaded ([Text in other languages](integration.md#text-in-other-languages)).
@@ -2325,6 +2346,18 @@ static int count = 3, selected = -1;
 cui_event_track_result r = cui_event_track(ui, "doses", doses, &count, 8, 6, 30, .step = 0.25,
                                            .units = CUI_AXIS_HOURS, .label_step = 3, .selected = &selected);
 if (r.changed) recompute();
+```
+
+`units = CUI_AXIS_HOURS` labels the axis as times of day; otherwise `format` prints the labels. For labels a format cannot write, `label` takes a function, the same `cui_axis_label_fn` as the dot chart's `x_label`, with `label_user` passed to it: it writes the axis labels and the time shown under the selected event, while `units` still picks the spacing. Here the axis counts days back from today and shows them as German dates:
+
+```c
+static void day_label(void *user, double day, char *out, size_t capacity) {
+    time_t t = *(const time_t *)user + (time_t)lround(day) * 86400;   /* day 0 is today */
+    struct tm *tm = localtime(&t);
+    if (!tm || !strftime(out, capacity, "%d.%m.", tm)) out[0] = 0;
+}
+static time_t today;                         /* set once: today = time(NULL) */
+cui_event_track(ui, "visits", visits, &count, 16, -30, 0, .step = 1, .label = day_label, .label_user = &today);
 ```
 
 You own the array and its count. The track edits them in place, keeps the times sorted and within `min` and `max`, and never adds past `capacity`; an array that arrives unsorted is sorted, with the selection kept on its event. A press on a dot takes it and a drag moves it, snapping to multiples of `step` from `min`; it may pass its neighbours, and the selection follows it to its new place in the array. A click on an empty spot of the track adds an event there and starts dragging it, and a double-click on a dot removes it. `no_add` and `no_remove` turn those off.
