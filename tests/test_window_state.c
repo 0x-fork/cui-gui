@@ -108,7 +108,11 @@ int main(void) {
     cui_app_maximize(app);
     if (reach(app, CUI_WINDOW_MAXIMIZED, "maximize")) {
         cui_vec2 s = cui_app_size(app);
-        expect(s.x > (float)w + 1 || s.y > (float)h + 1, "maximize: the content grew");
+        bool grew = s.x > (float)w + 1 || s.y > (float)h + 1;
+        /* SDL on X11 reports a maximize as soon as it asks for one, also when no window manager
+         * runs to carry it out (Xvfb without one) */
+        if (grew || strict) expect(grew, "maximize: the content grew");
+        else printf("skip: maximize: reported, but the content did not grow (no window manager?)\n");
         expect_placement(app, x2, y2, w, h, CUI_WINDOW_MAXIMIZED, "maximized");
         cui_app_restore(app);
         if (reach(app, CUI_WINDOW_NORMAL, "restore from maximized")) {
