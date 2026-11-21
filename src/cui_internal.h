@@ -442,6 +442,10 @@ typedef struct cui_interact {
 } cui_interact;
 
 enum { CUI_IF_FOCUSABLE = 1, CUI_IF_DRAG = 2, CUI_IF_KEEP_FOCUS = 4, CUI_IF_TEXT = 8, CUI_IF_COMPONENT_INPUT = 16 };
+typedef struct cui_modal_layer {
+    cui_id id;
+    int z;
+} cui_modal_layer;
 cui_interact cui__interact(cui_ctx *ui, cui_id id, int flags);
 void cui__mark_interactive(cui_ctx *ui, int node, int flags);
 void cui__set_cursor(cui_ctx *ui, cui_cursor c);
@@ -553,8 +557,7 @@ struct cui_ctx {
     cui__focus_entry *prev_focus_order; int prev_focus_count, prev_focus_cap;
     cui__focus_scope *focus_scope_stack; int focus_scope_depth, focus_scope_cap;
     cui_id active_focus_scope, prev_active_focus_scope;
-    cui_id modal_layer, prev_modal_layer;               /* topmost open modal */
-    int modal_z;
+    cui_modal_layer modal, prev_modal;                  /* topmost open modal */
     bool edit_prev;                                     /* a text field had focus last frame */
     cui_id hover_id_for_tooltip;
     double hover_start;
