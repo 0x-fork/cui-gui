@@ -423,7 +423,7 @@ typedef struct cui_hit {
 
 /* An inactive scope stays inactive through nested pushes. Outside any scope, both fields are zero. */
 typedef struct { cui_id id; bool inactive; } cui__focus_scope;
-typedef struct { cui_id id, layer; cui__focus_scope scope; } cui__focus_entry;
+typedef struct { cui_id id, layer; cui__focus_scope scope; bool component_input; } cui__focus_entry;   /* component_input: a canvas that routes its own keys */
 
 /* Hit-only flags for controls whose wheel range is separate from layout scroll.
  * They share cui_hit.flags with the CUI_NF_* node flags, so they sit above all of them. */
@@ -441,7 +441,7 @@ typedef struct cui_interact {
     bool keyboard_focused;    /* focused with no popup above this layer */
 } cui_interact;
 
-enum { CUI_IF_FOCUSABLE = 1, CUI_IF_DRAG = 2, CUI_IF_KEEP_FOCUS = 4, CUI_IF_TEXT = 8 };
+enum { CUI_IF_FOCUSABLE = 1, CUI_IF_DRAG = 2, CUI_IF_KEEP_FOCUS = 4, CUI_IF_TEXT = 8, CUI_IF_COMPONENT_INPUT = 16 };
 cui_interact cui__interact(cui_ctx *ui, cui_id id, int flags);
 void cui__mark_interactive(cui_ctx *ui, int node, int flags);
 void cui__set_cursor(cui_ctx *ui, cui_cursor c);
@@ -563,6 +563,14 @@ struct cui_ctx {
     cui_cursor cursor;
 
     /* input */
+    struct {
+        cui_input_hook_fn capture;
+        void *user;
+        cui_id focus_request, focus_owner;
+        cui_id previous_tab_owner;     /* built-in editor's Tab owner during replay */
+        bool repeated;
+        bool blocked_keys[CUI_KEY_COUNT];
+    } component_input;
     float mx, my, pmx, pmy;
     bool mouse_inside;
     bool mdown[3], mpressed[3], mreleased[3];
