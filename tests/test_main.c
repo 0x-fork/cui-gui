@@ -1183,6 +1183,51 @@ static void test_focus_scope(void) {
     cui_destroy(ui);
 }
 
+/* #111's focusable canvases inside #115's focus scopes: Tab, from a frame or from
+ * cui_dispatch_input, reaches only the active pane's canvas. */
+typedef struct { int active_pane; cui_id canvas[2]; } scope_canvas_state;
+
+static bool scope_canvas_route(cui_ctx *ui, void *user, const cui_input_event *e) { (void)ui; (void)user; (void)e; return false; }
+
+static void build_scope_canvas(cui_ctx *ui, void *u) {
+    scope_canvas_state *s = u;
+    const cui_canvas_opts opts = { .focusable = true, .component_input = true };
+    for (int k = 0; k < 2; k++) {
+        cui_focus_scope(ui, cui_make_id(ui, k ? "pane1" : "pane0"), s->active_pane == k) {
+            cui_canvas_ex(ui, k ? "canvas1" : "canvas0", CUI_PX(40), CUI_PX(20), NULL, NULL, 0, &opts);
+            s->canvas[k] = cui_last_id(ui);
+        }
+    }
+}
+
+static void test_focus_scope_canvas(void) {
+    printf("focus: Tab and ordered dispatch reach only the active pane's canvas\n");
+    cui_ctx *ui = new_ctx();
+    scope_canvas_state s = { .active_pane = 1 };
+    run(ui, build_scope_canvas, &s, 2);
+    for (int i = 0; i < 2; i++) {
+        cui_input_key(ui, CUI_KEY_TAB, true, 0);
+        cui_input_key(ui, CUI_KEY_TAB, false, 0);
+        run(ui, build_scope_canvas, &s, 1);
+        CHECK(cui_focused_id(ui) == s.canvas[1]);
+        CHECK(cui_component_has_input(ui, s.canvas[1]) && !cui_component_has_input(ui, s.canvas[0]));
+    }
+    s.active_pane = 0;
+    run(ui, build_scope_canvas, &s, 1);
+    const cui_input_event down = { .kind = CUI_INPUT_KEY, .key = CUI_KEY_TAB, .down = true };
+    const cui_input_event up = { .kind = CUI_INPUT_KEY, .key = CUI_KEY_TAB, .down = false };
+    for (int i = 0; i < 2; i++) {
+        cui_begin_frame(ui, 1.0f / 60.0f);
+        cui_dispatch_input(ui, &down, scope_canvas_route, NULL);
+        cui_dispatch_input(ui, &up, scope_canvas_route, NULL);
+        build_scope_canvas(ui, &s);
+        cui_end_frame(ui);
+        CHECK(cui_focused_id(ui) == s.canvas[0]);
+        CHECK(cui_component_has_input(ui, s.canvas[0]) && !cui_component_has_input(ui, s.canvas[1]));
+    }
+    cui_destroy(ui);
+}
+
 typedef struct {
     bool active, nested;
     int depth, hit;
@@ -10249,6 +10294,7 @@ int main(void) {
     test_image_update();
     test_canvas_frame_alloc();
     test_focus_scope();
+    test_focus_scope_canvas();
     test_nested_focus();
     test_nested_textarea_mixed_wheel();
     test_canvas_rail_wheel();
