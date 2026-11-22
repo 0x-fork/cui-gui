@@ -69,6 +69,7 @@ What changed in CUI, newest first. Every component mentioned here runs live in t
 
 ### Fixed
 
+- Windows: maximizing, minimizing or restoring a window no longer freezes it for about a second with vsync on. The window keeps presenting, without vsync, while DWM animates the change, and vsync comes back right after ([#117](https://github.com/yappologistic/CUI/issues/117)).
 - Repeated software screenshots capture the whole frame when the destination buffer is reused ([#101](https://github.com/yappologistic/CUI/issues/101)).
 - A week calendar or Gantt drag ends when the list shrinks, the component is disabled or `read_only` changes. A held mouse button can no longer resume that drag or move the item that took its place ([#109](https://github.com/yappologistic/CUI/issues/109)).
 - Idle X11 OpenGL windows now sleep until an application event or timer wakes them. On Mesa DRI3, a swap notification could start another frame and keep an idle window drawing at the display's refresh rate ([#104](https://github.com/yappologistic/CUI/issues/104)).
